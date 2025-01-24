@@ -1,9 +1,29 @@
 import React from 'react';
 import './App.scss';
 import { peopleFromServer } from './data/people';
+import { Person } from './types/Person';
 
 export const App: React.FC = () => {
-  const { name, born, died } = peopleFromServer[0];
+  const [selectedPerson, setSelectedPerson] = React.useState<Person>(
+    peopleFromServer[0],
+  );
+  const { name, born, died } = selectedPerson;
+  const [query, setQuery] = React.useState('');
+  const filteredPeople = React.useMemo(() => {
+    return peopleFromServer.filter(person =>
+      person.name.toLowerCase().includes(query.toLowerCase()),
+    );
+  }, [query]);
+  const [isDisplayedDropdown, setIsDisplayedDropdown] = React.useState(false);
+  const isEmptyPeopleList = filteredPeople.length === 0;
+
+  React.useEffect(() => {
+    if (isEmptyPeopleList) {
+      setIsDisplayedDropdown(false);
+    } else {
+      setIsDisplayedDropdown(true);
+    }
+  }, [isEmptyPeopleList]);
 
   return (
     <div className="container">
@@ -19,55 +39,58 @@ export const App: React.FC = () => {
               placeholder="Enter a part of the name"
               className="input"
               data-cy="search-input"
+              value={query}
+              onChange={event => {
+                setQuery(event.target.value);
+              }}
+              onFocus={() => {
+                if (!isEmptyPeopleList) {
+                  setIsDisplayedDropdown(true);
+                }
+              }}
             />
           </div>
 
-          <div className="dropdown-menu" role="menu" data-cy="suggestions-list">
-            <div className="dropdown-content">
-              <div className="dropdown-item" data-cy="suggestion-item">
-                <p className="has-text-link">Pieter Haverbeke</p>
-              </div>
-
-              <div className="dropdown-item" data-cy="suggestion-item">
-                <p className="has-text-link">Pieter Bernard Haverbeke</p>
-              </div>
-
-              <div className="dropdown-item" data-cy="suggestion-item">
-                <p className="has-text-link">Pieter Antone Haverbeke</p>
-              </div>
-
-              <div className="dropdown-item" data-cy="suggestion-item">
-                <p className="has-text-danger">Elisabeth Haverbeke</p>
-              </div>
-
-              <div className="dropdown-item" data-cy="suggestion-item">
-                <p className="has-text-link">Pieter de Decker</p>
-              </div>
-
-              <div className="dropdown-item" data-cy="suggestion-item">
-                <p className="has-text-danger">Petronella de Decker</p>
-              </div>
-
-              <div className="dropdown-item" data-cy="suggestion-item">
-                <p className="has-text-danger">Elisabeth Hercke</p>
+          {isDisplayedDropdown && (
+            <div
+              className="dropdown-menu"
+              role="menu"
+              data-cy="suggestions-list"
+            >
+              <div className="dropdown-content">
+                {filteredPeople.map(person => (
+                  <div
+                    className="dropdown-item"
+                    key={person.slug}
+                    data-cy="suggestion-item"
+                    onClick={() => {
+                      setSelectedPerson(person);
+                      setIsDisplayedDropdown(false);
+                    }}
+                  >
+                    <p className="has-text-link">{person.name}</p>
+                    {/*todo add class for has-text-danger if person is dead*/}
+                  </div>
+                ))}
               </div>
             </div>
-          </div>
+          )}
         </div>
-
-        <div
-          className="
+        {isEmptyPeopleList && (
+          <div
+            className="
             notification
             is-danger
             is-light
             mt-3
             is-align-self-flex-start
           "
-          role="alert"
-          data-cy="no-suggestions-message"
-        >
-          <p className="has-text-danger">No matching suggestions</p>
-        </div>
+            role="alert"
+            data-cy="no-suggestions-message"
+          >
+            <p className="has-text-danger">No matching suggestions</p>
+          </div>
+        )}
       </main>
     </div>
   );

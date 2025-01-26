@@ -4,13 +4,12 @@ import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
 import debounce from 'lodash.debounce';
 import { Alert } from './components/alert/Alert';
-import { DropdownItem } from './components/dropdownItem/DropdownItem';
+import { Dropdown } from './components/dropdown/Dropdown';
 
 export const App: React.FC = () => {
   const [selectedPerson, setSelectedPerson] = React.useState<Person | null>(
     null,
   );
-  const [query, setQuery] = React.useState('');
   const [appliedQuery, setAppliedQuery] = React.useState('');
   const setDelayedQuery = React.useMemo(
     () => debounce(setAppliedQuery, 300),
@@ -21,22 +20,7 @@ export const App: React.FC = () => {
       person.name.toLowerCase().includes(appliedQuery.toLowerCase()),
     );
   }, [appliedQuery]);
-  const [isDisplayedDropdown, setIsDisplayedDropdown] = React.useState(false);
   const isEmptyPeopleList = filteredPeople.length === 0;
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-
-  React.useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (
-        isDisplayedDropdown &&
-        !dropdownRef.current?.contains(event.target as Node)
-      ) {
-        setIsDisplayedDropdown(false);
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-  }, [isDisplayedDropdown]);
 
   return (
     <div className="container">
@@ -47,46 +31,12 @@ export const App: React.FC = () => {
             : 'No selected person'}
         </h1>
 
-        <div className="dropdown is-active">
-          <div className="dropdown-trigger">
-            <input
-              type="text"
-              placeholder="Enter a part of the name"
-              className="input"
-              data-cy="search-input"
-              value={query}
-              onChange={event => {
-                setQuery(event.target.value);
-                setDelayedQuery(event.target.value);
-                setSelectedPerson(null);
-              }}
-              onFocus={() => {
-                setIsDisplayedDropdown(true);
-              }}
-            />
-          </div>
-
-          {!isEmptyPeopleList && isDisplayedDropdown && (
-            <div
-              className="dropdown-menu"
-              role="menu"
-              data-cy="suggestions-list"
-              ref={dropdownRef}
-            >
-              <div className="dropdown-content">
-                {filteredPeople.map(person => (
-                  <DropdownItem
-                    key={person.slug}
-                    person={person}
-                    onSelected={setSelectedPerson}
-                    setIsDisplayedDropdown={setIsDisplayedDropdown}
-                    setQuery={setQuery}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
+        <Dropdown
+          setDelayedQuery={setDelayedQuery}
+          setSelectedPerson={setSelectedPerson}
+          people={filteredPeople}
+          isEmptyPeopleList={isEmptyPeopleList}
+        />
         {isEmptyPeopleList && <Alert />}
       </main>
     </div>

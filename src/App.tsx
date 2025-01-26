@@ -3,6 +3,7 @@ import './App.scss';
 import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
 import debounce from 'lodash.debounce';
+import { Alert } from "./components/alert/Alert";
 
 export const App: React.FC = () => {
   const [selectedPerson, setSelectedPerson] = React.useState<Person | null>(
@@ -16,13 +17,10 @@ export const App: React.FC = () => {
   );
   const filteredPeople = React.useMemo(() => {
     return peopleFromServer.filter(person =>
-      person.name.toLowerCase().includes(
-        appliedQuery.toLowerCase()
-      ),
+      person.name.toLowerCase().includes(appliedQuery.toLowerCase()),
     );
   }, [appliedQuery]);
-  const [isDisplayedDropdown, setIsDisplayedDropdown] =
-    React.useState(false);
+  const [isDisplayedDropdown, setIsDisplayedDropdown] = React.useState(false);
   const isEmptyPeopleList = filteredPeople.length === 0;
   const dropdownRef = React.useRef<HTMLDivElement>(null);
 
@@ -94,21 +92,7 @@ export const App: React.FC = () => {
             </div>
           )}
         </div>
-        {isEmptyPeopleList && (
-          <div
-            className="
-            notification
-            is-danger
-            is-light
-            mt-3
-            is-align-self-flex-start
-          "
-            role="alert"
-            data-cy="no-suggestions-message"
-          >
-            <p className="has-text-danger">No matching suggestions</p>
-          </div>
-        )}
+        {isEmptyPeopleList && <Alert />}
       </main>
     </div>
   );

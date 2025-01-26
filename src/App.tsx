@@ -2,34 +2,50 @@ import React from 'react';
 import './App.scss';
 import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
+import debounce from 'lodash.debounce';
 
 export const App: React.FC = () => {
-  const [selectedPerson, setSelectedPerson] = React.useState<Person>(
-    peopleFromServer[0],
+  const [selectedPerson, setSelectedPerson] = React.useState<Person | null>(
+    null,
   );
-  const { name, born, died } = selectedPerson;
   const [query, setQuery] = React.useState('');
+  const [appliedQuery, setAppliedQuery] = React.useState('');
+  const setDelayedQuery = React.useMemo(
+    () => debounce(setAppliedQuery, 300),
+    [],
+  );
   const filteredPeople = React.useMemo(() => {
     return peopleFromServer.filter(person =>
-      person.name.toLowerCase().includes(query.toLowerCase()),
+      person.name.toLowerCase().includes(
+        appliedQuery.toLowerCase()
+      ),
     );
-  }, [query]);
-  const [isDisplayedDropdown, setIsDisplayedDropdown] = React.useState(false);
+  }, [appliedQuery]);
+  const [isDisplayedDropdown, setIsDisplayedDropdown] =
+    React.useState(false);
   const isEmptyPeopleList = filteredPeople.length === 0;
+  const dropdownRef = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
-    if (isEmptyPeopleList) {
-      setIsDisplayedDropdown(false);
-    } else {
-      setIsDisplayedDropdown(true);
-    }
-  }, [isEmptyPeopleList]);
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        isDisplayedDropdown &&
+        !dropdownRef.current?.contains(event.target as Node)
+      ) {
+        setIsDisplayedDropdown(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+  }, [isDisplayedDropdown]);
 
   return (
     <div className="container">
       <main className="section is-flex is-flex-direction-column">
         <h1 className="title" data-cy="title">
-          {`${name} (${born} - ${died})`}
+          {selectedPerson
+            ? `${selectedPerson.name} (${selectedPerson.born} - ${selectedPerson.died})`
+            : 'No selected person'}
         </h1>
 
         <div className="dropdown is-active">
@@ -42,20 +58,21 @@ export const App: React.FC = () => {
               value={query}
               onChange={event => {
                 setQuery(event.target.value);
+                setDelayedQuery(event.target.value);
+                setSelectedPerson(null);
               }}
               onFocus={() => {
-                if (!isEmptyPeopleList) {
-                  setIsDisplayedDropdown(true);
-                }
+                setIsDisplayedDropdown(true);
               }}
             />
           </div>
 
-          {isDisplayedDropdown && (
+          {!isEmptyPeopleList && isDisplayedDropdown && (
             <div
               className="dropdown-menu"
               role="menu"
               data-cy="suggestions-list"
+              ref={dropdownRef}
             >
               <div className="dropdown-content">
                 {filteredPeople.map(person => (
@@ -66,6 +83,7 @@ export const App: React.FC = () => {
                     onClick={() => {
                       setSelectedPerson(person);
                       setIsDisplayedDropdown(false);
+                      setQuery(person.name);
                     }}
                   >
                     <p className="has-text-link">{person.name}</p>

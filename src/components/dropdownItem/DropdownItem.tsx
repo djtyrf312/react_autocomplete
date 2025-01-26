@@ -1,11 +1,11 @@
-import React from 'react';
+import React, { Dispatch, SetStateAction } from 'react';
 import { Person } from '../../types/Person';
 
 type Props = {
   person: Person;
-  onSelected: (person: Person) => {};
-  setIsDisplayedDropdown: (isDisplayed: boolean) => {};
-  setQuery: (query: string) => {};
+  onSelected: Dispatch<SetStateAction<Person | null>>;
+  setIsDisplayedDropdown: Dispatch<SetStateAction<boolean>>;
+  setQuery: Dispatch<SetStateAction<string>>;
 };
 
 export const DropdownItem: React.FC<Props> = ({

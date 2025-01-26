@@ -3,7 +3,8 @@ import './App.scss';
 import { peopleFromServer } from './data/people';
 import { Person } from './types/Person';
 import debounce from 'lodash.debounce';
-import { Alert } from "./components/alert/Alert";
+import { Alert } from './components/alert/Alert';
+import { DropdownItem } from './components/dropdownItem/DropdownItem';
 
 export const App: React.FC = () => {
   const [selectedPerson, setSelectedPerson] = React.useState<Person | null>(
@@ -74,19 +75,13 @@ export const App: React.FC = () => {
             >
               <div className="dropdown-content">
                 {filteredPeople.map(person => (
-                  <div
-                    className="dropdown-item"
+                  <DropdownItem
                     key={person.slug}
-                    data-cy="suggestion-item"
-                    onClick={() => {
-                      setSelectedPerson(person);
-                      setIsDisplayedDropdown(false);
-                      setQuery(person.name);
-                    }}
-                  >
-                    <p className="has-text-link">{person.name}</p>
-                    {/*todo add class for has-text-danger if person is dead*/}
-                  </div>
+                    person={person}
+                    onSelected={setSelectedPerson}
+                    setIsDisplayedDropdown={setIsDisplayedDropdown}
+                    setQuery={setQuery}
+                  />
                 ))}
               </div>
             </div>

@@ -1,23 +1,30 @@
 import { DropdownMenu } from '../dropdownMenu/DropdownMenu';
 import React from 'react';
 import { Person } from '../../types/Person';
+import debounce from 'lodash.debounce';
 
 type Props = {
-  setDelayedQuery: React.Dispatch<React.SetStateAction<string>>;
-  setSelectedPerson: React.Dispatch<React.SetStateAction<Person | null>>;
+  onQueryChange: React.Dispatch<React.SetStateAction<string>>;
+  onPersonSelect: React.Dispatch<React.SetStateAction<Person | null>>;
   people: Person[];
-  isEmptyPeopleList: boolean;
+  isEmptyPeople: boolean;
+  debounceDelay: number;
 };
 
 export const Dropdown: React.FC<Props> = ({
-  setDelayedQuery,
-  setSelectedPerson,
+  onPersonSelect,
   people,
-  isEmptyPeopleList,
+  isEmptyPeople,
+  onQueryChange,
+  debounceDelay,
 }) => {
   const dropdownRef = React.useRef<HTMLDivElement>(null);
   const [query, setQuery] = React.useState('');
   const [isDisplayedDropdown, setIsDisplayedDropdown] = React.useState(false);
+  const setDelayedQuery = React.useMemo(
+    () => debounce(onQueryChange, debounceDelay),
+    [debounceDelay, onQueryChange],
+  );
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -44,7 +51,7 @@ export const Dropdown: React.FC<Props> = ({
           onChange={event => {
             setQuery(event.target.value);
             setDelayedQuery(event.target.value);
-            setSelectedPerson(null);
+            onPersonSelect(null);
           }}
           onFocus={() => {
             setIsDisplayedDropdown(true);
@@ -52,11 +59,11 @@ export const Dropdown: React.FC<Props> = ({
         />
       </div>
 
-      {!isEmptyPeopleList && isDisplayedDropdown && (
+      {!isEmptyPeople && isDisplayedDropdown && (
         <DropdownMenu
           people={people}
           dropdownRef={dropdownRef}
-          setSelectedPerson={setSelectedPerson}
+          setSelectedPerson={onPersonSelect}
           setDisplayedDropdown={setIsDisplayedDropdown}
           setQuery={setQuery}
         />

@@ -30,7 +30,7 @@ export const Dropdown: React.FC<Props> = ({
     const handleClickOutside = (event: MouseEvent) => {
       if (
         isDisplayedDropdown &&
-        !dropdownRef.current?.contains(event.target as Node)
+        !dropdownRef.current?.contains(event.target)
       ) {
         setIsDisplayedDropdown(false);
       }

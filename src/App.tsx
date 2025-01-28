@@ -10,12 +10,13 @@ export const App: React.FC = () => {
     null,
   );
   const [appliedQuery, setAppliedQuery] = React.useState('');
-  const filteredPeople = React.useMemo(() => {
-    return peopleFromServer.filter(person =>
-      person.name.toLowerCase().includes(appliedQuery.toLowerCase()),
-    );
-  }, [appliedQuery]);
-  const isEmptyPeopleList = filteredPeople.length === 0;
+  const people = React.useMemo(
+    () =>
+      peopleFromServer.filter(person =>
+        person.name.toLowerCase().includes(appliedQuery.toLowerCase()),
+      ),
+    [appliedQuery],
+  );
 
   return (
     <div className="container">
@@ -29,11 +30,10 @@ export const App: React.FC = () => {
         <Dropdown
           onQueryChange={setAppliedQuery}
           onPersonSelect={setSelectedPerson}
-          people={filteredPeople}
-          isEmptyPeople={isEmptyPeopleList}
+          people={people}
           debounceDelay={300}
         />
-        {isEmptyPeopleList && <Alert />}
+        {people.length === 0 && <Alert />}
       </main>
     </div>
   );

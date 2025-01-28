@@ -16,25 +16,23 @@ export const DropdownMenu: React.FC<Props> = ({
   setSelectedPerson,
   setDisplayedDropdown,
   setQuery,
-}: Props) => {
-  return (
-    <div
-      className="dropdown-menu"
-      role="menu"
-      data-cy="suggestions-list"
-      ref={dropdownRef}
-    >
-      <div className="dropdown-content">
-        {people.map(person => (
-          <DropdownItem
-            key={person.slug}
-            person={person}
-            onSelected={setSelectedPerson}
-            setIsDisplayedDropdown={setDisplayedDropdown}
-            setQuery={setQuery}
-          />
-        ))}
-      </div>
+}: Props) => (
+  <div
+    className="dropdown-menu"
+    role="menu"
+    data-cy="suggestions-list"
+    ref={dropdownRef}
+  >
+    <div className="dropdown-content">
+      {people.map(person => (
+        <DropdownItem
+          key={person.slug}
+          person={person}
+          onSelected={setSelectedPerson}
+          setIsDisplayedDropdown={setDisplayedDropdown}
+          setQuery={setQuery}
+        />
+      ))}
     </div>
-  );
-};
+  </div>
+);
